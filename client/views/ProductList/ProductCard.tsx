@@ -1,16 +1,19 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
-import {Product} from "../models/product";
+import { Product } from '../../models/product';
+import { Variant } from './Variant';
 
 export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { title, variants } = product;
-  const firstVariant = variants[0];
 
   return (
     <View style={styles.card}>
       {product.image && <Image source={{ uri: product.image.src }} style={styles.image} />}
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.price}>Price: {firstVariant.price}</Text>
-      <Text style={styles.inventory}>Inventory: {firstVariant.inventory_quantity}</Text>
+      <View style={{ height: 16 }} />
+      {variants.map((variant, i) => (
+        // first variant is opened by default
+        <Variant {...variant} initialState={i === 0} key={i.toString()} />
+      ))}
     </View>
   );
 };
@@ -22,9 +25,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     elevation: 2,
+    position: 'relative',
   },
   image: {
-    width: 100,
+    width: '100%',
     height: 100,
     resizeMode: 'cover',
     marginBottom: 8,
@@ -43,4 +47,3 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
-

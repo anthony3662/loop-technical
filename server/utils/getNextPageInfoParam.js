@@ -1,5 +1,5 @@
 // Parse the link header and extract the page_info param within the "next" and "previous" link
-const getNextPageInfo = linkHeader => {
+const getNextPageInfoParam = linkHeader => {
   try {
     const output = {
       next: null,
@@ -28,5 +28,5 @@ const getNextPageInfo = linkHeader => {
 };
 
 module.exports = {
-  getNextPageInfo,
+  getNextPageInfoParam,
 };

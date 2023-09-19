@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('express-async-errors');
-const { getNextPageInfo } = require('./utils/getNextPageInfo');
+const { getNextPageInfoParam } = require('./utils/getNextPageInfoParam');
 const express = require('express');
 const app = express();
 const port = 3000;
@@ -38,7 +38,7 @@ app.get('/orders', async (req, res) => {
     }
     const { headers: resHeaders } = response;
     const links = resHeaders.get('Link');
-    const pageInfoParams = getNextPageInfo(links);
+    const pageInfoParams = getNextPageInfoParam(links);
     const json = await response.json();
     fetchedOrders = [...fetchedOrders, ...json.orders];
     if (pageInfoParams.next) {
@@ -85,7 +85,7 @@ app.get('/products', (req, res) => {
       }
       const { headers: resHeaders } = response;
       const links = resHeaders.get('Link');
-      const pageInfoParams = getNextPageInfo(links);
+      const pageInfoParams = getNextPageInfoParam(links);
       const json = await response.json();
       return { ...json, pageInfoParams };
     })

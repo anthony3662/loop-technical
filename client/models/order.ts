@@ -1,8 +1,8 @@
 export type Order = {
   line_items: {
     price: string;
-    product_id: string;
-    variant_id: string;
+    product_id: number;
+    variant_id: number;
     quantity: number;
   }[];
 };

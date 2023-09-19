@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { ProductVariant } from '../../models/product';
-import { getOrderTotals, TotalEntry } from '../../utils/getOrderTotals';
+import { TotalEntry } from '../../utils/getOrderTotals';
 
 type VariantProps = ProductVariant & { initialState?: boolean; variantTable: TotalEntry };
 export const Variant: React.FC<VariantProps> = ({ id, title, inventory_quantity, price, initialState = false, variantTable }) => {
   const [isOpen, setIsOpen] = useState(initialState);
+  const { orders = 0, quantity = 0, priceTotal = 0 } = variantTable[id] || {};
+
   return (
     <TouchableOpacity style={styles.wrapper} onPress={() => setIsOpen(v => !v)}>
       <View style={styles.header}>
@@ -19,9 +21,9 @@ export const Variant: React.FC<VariantProps> = ({ id, title, inventory_quantity,
           <Text>Price: {price}</Text>
           <Text>Inventory: {inventory_quantity}</Text>
           <View style={{ height: 8 }} />
-          <Text>Orders Placed: {variantTable[id]?.orders || 0}</Text>
-          <Text>Quantity Ordered: {variantTable[id]?.quantity || 0}</Text>
-          <Text>Value of Orders: ${variantTable[id]?.priceTotal || 0}</Text>
+          <Text>Orders Placed: {orders}</Text>
+          <Text>Quantity Ordered: {quantity}</Text>
+          <Text>Value of Orders: ${priceTotal}</Text>
         </>
       ) : null}
     </TouchableOpacity>

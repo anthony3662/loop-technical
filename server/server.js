@@ -60,7 +60,9 @@ app.get('/orders', async (req, res) => {
   }
 });
 
-const ProductPageCache = {}; // a very simple cache
+// a very simple cache
+// cache keys is the query param string passed to the Shopify api
+const ProductPageCache = {};
 
 app.get('/products', (req, res) => {
   const { page_info } = req.query;

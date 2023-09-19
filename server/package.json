@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "lint": "yarn prettier . --write",
-    "expose": "lt --port 3000 --subdomain loop-take-home"
+    "expose": "lt --port 3000 --subdomain loop-take-home",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +17,8 @@
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "prettier": "^3.0.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

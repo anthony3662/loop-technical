@@ -7,13 +7,15 @@ export const ProductCard: React.FC<{ product: Product; orderTotals: ReturnType<t
   const { title, variants, id } = product;
 
   const { productTable, variantTable } = orderTotals;
+  const { orders = 0, quantity = 0, priceTotal = 0 } = productTable[id] || {};
+
   return (
     <View style={styles.card}>
       {product.image && <Image source={{ uri: product.image.src }} style={styles.image} />}
       <Text style={styles.title}>{title}</Text>
-      <Text>Orders Placed: {productTable[id]?.orders || 0}</Text>
-      <Text>Quantity Ordered: {productTable[id]?.quantity || 0}</Text>
-      <Text>Value of Orders: ${productTable[id]?.priceTotal || 0}</Text>
+      <Text>Orders Placed: {orders}</Text>
+      <Text>Quantity Ordered: {quantity}</Text>
+      <Text>Value of Orders: ${priceTotal}</Text>
       <View style={{ height: 16 }} />
       {variants.map((variant, i) => (
         // first variant is expanded by default

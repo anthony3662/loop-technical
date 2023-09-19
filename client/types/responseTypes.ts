@@ -1,4 +1,5 @@
 import { Product } from '../models/product';
+import { Order } from '../models/order';
 
 export type ProductsResponse = {
   products: Product[];
@@ -7,3 +8,5 @@ export type ProductsResponse = {
     previous: string | null;
   };
 };
+
+export type OrdersResponse = Order[];

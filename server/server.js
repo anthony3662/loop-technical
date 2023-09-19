@@ -23,9 +23,44 @@ app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-app.get('/orders', (req, res) => {
-  // fetchAndRespond('/orders.json', req, res);
+let ordersCache = null; // very simple cache
+
+app.get('/orders', async (req, res) => {
+  let fetchedOrders = [];
+  const fetchUntilEnd = async (nextPageInfo = undefined) => {
+    const params = new URLSearchParams(nextPageInfo ? { page_info: nextPageInfo } : undefined);
+    const response = await fetch(`${BASE_URL}/orders.json?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const { headers: resHeaders } = response;
+    const links = resHeaders.get('Link');
+    const pageInfoParams = getNextPageInfo(links);
+    const json = await response.json();
+    fetchedOrders = [...fetchedOrders, ...json.orders];
+    if (pageInfoParams.next) {
+      await fetchUntilEnd(pageInfoParams.next);
+    }
+  };
+
+  try {
+    if (ordersCache) {
+      res.json(ordersCache);
+    } else {
+      await fetchUntilEnd();
+      ordersCache = fetchedOrders;
+      res.json(fetchedOrders);
+    }
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(500);
+  }
 });
+
+const ProductPageCache = {}; // a very simple cache
 
 app.get('/products', (req, res) => {
   const { page_info } = req.query;
@@ -33,6 +68,12 @@ app.get('/products', (req, res) => {
     limit: 10,
     ...(page_info ? { page_info } : {}),
   });
+
+  if (ProductPageCache[params]) {
+    console.log('cache data');
+    res.json(ProductPageCache[params]);
+    return;
+  }
 
   fetch(`${BASE_URL}/products.json?${params}`, {
     method: 'GET',
@@ -42,13 +83,15 @@ app.get('/products', (req, res) => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const { headers } = response;
-      const links = headers.get('Link');
+      const { headers: resHeaders } = response;
+      const links = resHeaders.get('Link');
       const pageInfoParams = getNextPageInfo(links);
       const json = await response.json();
       return { ...json, pageInfoParams };
     })
     .then(data => {
+      ProductPageCache[params] = data;
+      console.log('new data');
       res.json(data);
     })
     .catch(error => {

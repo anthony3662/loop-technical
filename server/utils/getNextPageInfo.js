@@ -1,4 +1,4 @@
-// Parse the link header and extract the "next" link
+// Parse the link header and extract the page_info param within the "next" and "previous" link
 const getNextPageInfo = linkHeader => {
   try {
     const output = {
@@ -7,12 +7,13 @@ const getNextPageInfo = linkHeader => {
     };
 
     const links = linkHeader.split(', ');
-    // Iterate through the links to find the "next" link
     for (const link of links) {
       const [url, rel] = link.split('; ');
       // Remove angle brackets from the URL
       const urlWithoutBrackets = url.slice(1, -1);
-      const params = new URLSearchParams(urlWithoutBrackets);
+      // Isolate the query string
+      const queryString = urlWithoutBrackets.split('?')[1] || '';
+      const params = new URLSearchParams(queryString);
       const pageInfoParam = params.get('page_info');
       if (rel === 'rel="next"') {
         output.next = pageInfoParam;

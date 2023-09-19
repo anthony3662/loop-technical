@@ -1,36 +1,48 @@
 import { ActivityIndicator, FlatList, Text, View, StyleSheet, Button } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRequest } from '../../utils/useRequest';
-import { ProductsResponse } from '../../types/responseTypes';
+import { OrdersResponse, ProductsResponse } from '../../types/responseTypes';
 import { ProductCard } from './ProductCard';
+import { getOrderTotals } from '../../utils/getOrderTotals';
 
 const BASE_PRODUCTS_URL = 'https://loop-take-home.loca.lt/products';
+const BASE_ORDERS_URL = 'https://loop-take-home.loca.lt/orders';
 export const ProductList: React.FC = () => {
-  const { get, data, isLoading } = useRequest<ProductsResponse>();
+  const { get: getProducts, data: productsData, isLoading: isProductsLoading } = useRequest<ProductsResponse>();
+  const { get: getOrders, data: ordersData, isLoading: isOrdersLoading } = useRequest<OrdersResponse>();
+  const isLoading = isProductsLoading || isOrdersLoading;
 
   useEffect(() => {
     // initial fetch
-    get(BASE_PRODUCTS_URL);
+    getProducts(BASE_PRODUCTS_URL);
+    getOrders(BASE_ORDERS_URL);
   }, []);
 
+  const orderTotals = useMemo(() => {
+    if (!ordersData) {
+      return;
+    }
+    return getOrderTotals(ordersData);
+  }, [ordersData]);
+
   const fetchNextPage = () => {
-    const nextPageInfo = data?.pageInfoParams.next;
+    const nextPageInfo = productsData?.pageInfoParams.next;
     if (!nextPageInfo || isLoading) {
       return;
     }
-    get(`${BASE_PRODUCTS_URL}?page_info=${nextPageInfo}`);
+    getProducts(`${BASE_PRODUCTS_URL}?page_info=${nextPageInfo}`);
   };
 
   const fetchPreviousPage = () => {
-    const lastPageInfo = data?.pageInfoParams.previous;
+    const lastPageInfo = productsData?.pageInfoParams.previous;
     if (!lastPageInfo || isLoading) {
       return;
     }
-    get(`${BASE_PRODUCTS_URL}?page_info=${lastPageInfo}`);
+    getProducts(`${BASE_PRODUCTS_URL}?page_info=${lastPageInfo}`);
   };
 
   const renderData = () => {
-    if (!data || isLoading) {
+    if (!productsData || !orderTotals || isLoading) {
       return (
         <View style={styles.loader}>
           <ActivityIndicator />
@@ -39,9 +51,9 @@ export const ProductList: React.FC = () => {
     }
     return (
       <FlatList
-        data={data.products}
+        data={productsData.products}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <ProductCard product={item} />}
+        renderItem={({ item }) => <ProductCard product={item} orderTotals={orderTotals} />}
       />
     );
   };
@@ -50,8 +62,12 @@ export const ProductList: React.FC = () => {
       <Text style={styles.header}>Universe of Birds</Text>
       {renderData()}
       <View style={styles.pageTurner}>
-        {data?.pageInfoParams.previous ? <Button disabled={isLoading} onPress={fetchPreviousPage} title={'Previous Page'} /> : <View />}
-        {data?.pageInfoParams.next ? <Button disabled={isLoading} onPress={fetchNextPage} title={'Next Page'} /> : null}
+        {productsData?.pageInfoParams?.previous ? (
+          <Button disabled={isLoading} onPress={fetchPreviousPage} title={'Previous Page'} />
+        ) : (
+          <View />
+        )}
+        {productsData?.pageInfoParams?.next ? <Button disabled={isLoading} onPress={fetchNextPage} title={'Next Page'} /> : null}
       </View>
     </View>
   );
